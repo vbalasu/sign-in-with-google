@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In With Google</title>
+</head>
+<body>
+    <script src="https://accounts.google.com/gsi/client" onload="setupAuthorization()" async defer></script>
+    <div id="g_id_onload"
+        data-client_id="893193964658-7ea7od8be0kom1ih5mc72jsa5nuo1dcp.apps.googleusercontent.com"
+        data-auto_prompt="false"
+        data-callback="handleCredentialResponse">
+    </div>
+    <div class="g_id_signin"
+        data-type="standard"
+        data-size="large"
+        data-theme="outline"
+        data-text="sign_in_with"
+        data-shape="rectangular"
+        data-logo_alignment="left">
+    </div>
+    <div id="token"></div><br><br>
+    <div id="contents"></div>
+    <button id="btnDrive" onclick="client.requestAccessToken();" style="display:none;">Save to Google Drive</button>
+    <div id="authorization"></div>
+
+    <script type="module">
+        // Authentication
+        import * as jose from 'jose';
+        function handleCredentialResponse(response) {
+            document.getElementById('token').append("Encoded JWT ID token: " + response.credential);
+            document.getElementById('contents').append(JSON.stringify(jose.decodeJwt(response.credential)));
+        }
+        window.handleCredentialResponse = handleCredentialResponse;
+    </script>
+
+    <script>
+        function setupAuthorization() {
+            // This function is triggered by the onload event of the gsi/client script
+            console.log('setupAuthorization');
+            // Access the Drive API V3
+            const client = google.accounts.oauth2.initTokenClient({
+                client_id: '893193964658-7ea7od8be0kom1ih5mc72jsa5nuo1dcp.apps.googleusercontent.com',
+                scope: 'https://www.googleapis.com/auth/drive.file',
+                callback: (response) => {
+                    // Response contains the access token for the requested scope
+                    document.getElementById('authorization').innerHTML = JSON.stringify(response);
+                    // Do something with the access token here
+                },
+            });
+            window.client = client;
+            document.getElementById('btnDrive').style.display = 'block';  // Unhide the button
+        }
+    </script>
+</body>
+</html>
